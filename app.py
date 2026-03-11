@@ -581,6 +581,7 @@ def speak():
         return jsonify({"audio": audio_base64})
     
     except Exception as e:
+        print(f"SPEAK ERROR: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
