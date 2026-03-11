@@ -4,6 +4,7 @@ import json
 import urllib.request
 import urllib.parse
 import re
+import base64
 
 app = Flask(__name__)
 client = boto3.client(service_name='bedrock-runtime', region_name='us-east-1')
@@ -460,6 +461,34 @@ PAGE2 = '''<!DOCTYPE html>
       ? '<span class="tag">Yes — no sources found</span>'
       : '<span class="tag" style="background:#2a7a2a">No — sources present</span>';
   </script>
+  <script>
+async function speakResults(text) {
+    try {
+        const response = await fetch('/speak', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({text: text})
+        });
+        const data = await response.json();
+        if (data.audio) {
+            const audio = new Audio('data:audio/mp3;base64,' + data.audio);
+            audio.play();
+        }
+    } catch(e) {
+        console.log('Audio not available:', e);
+    }
+}
+
+window.addEventListener('load', function() {
+    const score = document.getElementById('riskScore')?.innerText || '';
+    const label = document.getElementById('riskLabel')?.innerText || '';
+    const explanation = document.querySelector('.explanation-box')?.innerText || '';
+    if (score && label) {
+        const text = `Analysis complete. ${label} detected. Score ${score}. ${explanation}`;
+        speakResults(text);
+    }
+});
+</script>
 </body>
 </html>'''
 
@@ -522,6 +551,37 @@ Respond ONLY with valid JSON. No markdown. No backticks. No explanation."""
             "missing_citations": True,
             "explanation": "Analysis completed with limited data."
         })
+@app.route('/speak', methods=['POST'])
+def speak():
+    try:
+        data = request.get_json()
+        text = data.get('text', '')
+        
+        bedrock = boto3.client(service_name='bedrock-runtime', region_name='us-east-1')
+        
+        response = bedrock.invoke_model(
+            modelId='amazon.nova-2-sonic-v1:0',
+            body=json.dumps({
+                "taskType": "TEXT_TO_SPEECH",
+                "textToSpeechTaskParams": {
+                    "text": text
+                },
+                "audioGenerationConfig": {
+                    "format": "mp3",
+                    "sampleRate": "24000"
+                }
+            }),
+            contentType='application/json',
+            accept='application/json'
+        )
+        
+        result = json.loads(response['body'].read())
+        audio_base64 = result['audioStream']
+        
+        return jsonify({"audio": audio_base64})
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
