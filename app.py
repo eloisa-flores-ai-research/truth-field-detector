@@ -482,11 +482,17 @@ async function speakResults(text) {
 window.addEventListener('load', function() {
     const score = document.getElementById('riskScore')?.innerText || '';
     const label = document.getElementById('riskLabel')?.innerText || '';
-    const explanation = document.querySelector('.explanation-box')?.innerText || '';
+    const explanation = document.getElementById('explanation')?.innerText || '';
+    const emotional = Array.from(document.querySelectorAll('#emotionalTags .tag')).map(t => t.innerText).join(', ');
+    const absolutist = Array.from(document.querySelectorAll('#absolutistTags .tag')).map(t => t.innerText).join(', ');
+    const citations = document.querySelector('#citationsTags .tag')?.innerText || '';
     if (score && label) {
-        const explanation = document.getElementById('explanation')?.innerText || '';
-const text = `Analysis complete. ${label}. Score ${score}. ${explanation}`;
-        speakResults(text);
+        let fullText = `Analysis complete. ${label}. Score ${score} out of 100. ${explanation}`;
+        if (emotional) fullText += ` Emotional language detected: ${emotional}.`;
+        if (absolutist) fullText += ` Absolutist claims found: ${absolutist}.`;
+        if (citations) fullText += ` Missing citations: ${citations}.`;
+        fullText += ` Analyzed by Amazon Nova — building the future now.`;
+        speakResults(fullText);
     }
 });
 </script>
