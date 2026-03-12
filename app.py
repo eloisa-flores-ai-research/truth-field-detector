@@ -484,7 +484,8 @@ window.addEventListener('load', function() {
     const label = document.getElementById('riskLabel')?.innerText || '';
     const explanation = document.querySelector('.explanation-box')?.innerText || '';
     if (score && label) {
-        const text = `Analysis complete. ${label} detected. Score ${score}. ${explanation}`;
+        const explanation = document.getElementById('explanation')?.innerText || '';
+const text = `Analysis complete. ${label}. Score ${score}. ${explanation}`;
         speakResults(text);
     }
 });
