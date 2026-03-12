@@ -557,31 +557,34 @@ def speak():
         data = request.get_json()
         text = data.get('text', '')
         
-        bedrock = boto3.client(service_name='bedrock-runtime', region_name='us-east-1')
-        
-        response = bedrock.invoke_model(
-            modelId='amazon.nova-2-sonic-v1:0',
-            body=json.dumps({
-                "taskType": "TEXT_TO_SPEECH",
-                "textToSpeechTaskParams": {
-                    "text": text
-                },
-                "audioGenerationConfig": {
-                    "format": "mp3",
-                    "sampleRate": "24000"
-                }
-            }),
-            contentType='application/json',
-            accept='application/json'
+        import boto3
+        bedrock = boto3.client(
+            service_name='bedrock-runtime',
+            region_name='us-east-1'
         )
         
-        result = json.loads(response['body'].read())
-        audio_base64 = result['audioStream']
+        body = json.dumps({
+            "voice": "tiffany",
+            "text": text,
+            "responseFormat": "mp3"
+        })
+        
+        response = bedrock.invoke_model(
+            modelId='amazon.nova-sonic-v1:0',
+            body=body,
+            contentType='application/json',
+            accept='audio/mpeg'
+        )
+        
+        audio_bytes = response['body'].read()
+        audio_base64 = base64.b64encode(audio_bytes).decode('utf-8')
         
         return jsonify({"audio": audio_base64})
     
     except Exception as e:
         print(f"SPEAK ERROR: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
