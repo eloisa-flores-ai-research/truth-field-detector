@@ -12,6 +12,7 @@
 This project and all its contents — including but not limited to source code, design, logic, and assets — are the exclusive intellectual property of Eloisa Flores. This repository is shared publicly for evaluation purposes only, including the Amazon Nova Hackathon. Copying, cloning, redistributing, or using any part of this project without explicit written permission from the author is strictly prohibited. Submission to the Amazon Nova Hackathon grants Amazon and Devpost a non-exclusive license to evaluate and promote this project as described in the official hackathon rules — all other rights are reserved by the author.
 
 ---
+![Truth Field Detector](truth-field-detector%20analyzing.png)
 
 ## What It Does
 
